@@ -628,10 +628,11 @@ func commandCatch() func([]string) error {
     catchChance := 100 - (pokemonNameJson.BaseExperience / 10)  
 
     if rand.Intn(100) < catchChance {
-      fmt.Printf("%s escaped!\n", pokemonName)
-    } else {
       mapOfCaughtPokemon[pokemonName] = pokemonNameJson
       fmt.Printf("%s was caught!\n", pokemonName)
+      fmt.Println("You may now inspect it with the inspect command.")
+    } else {
+      fmt.Printf("%s escaped!\n", pokemonName)
     }
 
     return nil
@@ -661,12 +662,23 @@ func commandInspect() func([]string) error {
 
       fmt.Println("Types:")
 
-      for _, pokemonType := range caughtPokemon.Types { 
-        fmt.Printf(" - %s\n", pokemonType.Type.Name)
+      for _, typeInfo := range caughtPokemon.Types { 
+        fmt.Printf(" - %s\n", typeInfo.Type.Name)
       }
     }
 
     return nil
+  }
+}
+
+func commandPokedex() func([]string) error {
+  return func(args []string) error {
+    fmt.Println("Your Pokedex:") 
+    for _, pokemon := range mapOfCaughtPokemon {
+      fmt.Printf(" - %s\n", pokemon.Name)
+    }
+
+    return nil 
   }
 }
 
@@ -716,6 +728,12 @@ func main() {
       name: "inspect",
       description: "inspect details of the caught pokemon",
       callback: commandInspect(),
+  }
+
+  commandsRegistry["pokedex"] = cliCommand {
+      name: "pokedex",
+      description: "prints a list of all the pokemon the user has caught",
+      callback: commandPokedex(),
   }
 
   scanner := bufio.NewScanner(os.Stdin)
